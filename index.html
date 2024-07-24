@@ -3,20 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Projects Dashboard</title>
+    <title>Getir Internal Audit Executive Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link href="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.js"></script>
+    <link rel="icon" href="logo.png">
 </head>
 <body>
-    <h1>Audit Projects Dashboard</h1>
+    <h1>Getir Internal Audit Executive Dashboard</h1>
+    <div class="year-selector">
+        <select id="yearSelector">
+            <option value="all">All</option>
+            <!-- Add year options dynamically using JavaScript -->
+        </select>
+    </div>
     <div class="chart-wrapper">
-        <h2>Audit Project Status Distribution</h2>
+        <h2 class="chart-title">Audit Project Status Distribution</h2>
         <div class="chart-container">
             <canvas id="statusChart"></canvas>
+            <div id="chartCenterText" class="chart-center-text"></div>
         </div>
     </div>
-
+    <div class="audit-list-wrapper" id="auditListWrapper" style="display:none;">
+        <h3 id="auditListTitle">Audit Projects</h3>
+        <ul id="auditList"></ul>
+    </div>
+    <div class="chart-wrapper timeline-wrapper">
+        <h2>Audit Projects Timeline</h2>
+        <button id="today-button">Today</button>
+        <div id="timeline"></div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
