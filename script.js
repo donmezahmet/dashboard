@@ -1,4 +1,5 @@
 let currentTimeout;
+
 document.addEventListener("DOMContentLoaded", function () {
     const apiKey = 'paterprymY3bvNFEU.4dc918b6de1a00a553b4eff674b73e039f2daa5b5c2f9414607e5af126a2987d';
     const baseId = 'apptCUn5WwTZtUzr9';
@@ -13,6 +14,258 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         const records = data.records;
+
+        // Risk Rating Breakdown
+        const riskRatingData = {
+            labels: ['Critical Risk', 'High Risk', 'Medium Risk', 'Low Risk'],
+            datasets: [{
+                data: [3, 12, 39, 46],
+                backgroundColor: ['#FF5A5E', '#FF8C00', '#FFCD56', '#4BC0C0'],
+                borderColor: ['#FF5A5E', '#FF8C00', '#FFCD56', '#4BC0C0'],
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(document.getElementById('riskRatingChart').getContext('2d'), {
+            type: 'doughnut',
+            data: riskRatingData,
+            options: {
+                plugins: {
+                    legend: {
+                        display: false, // Burada legend'ı gizle
+                    },
+                    datalabels: {
+                        formatter: (value) => `${value}%`,
+                        color: '#000',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        });
+
+        const actionPlanData = {
+            labels: ['Deferred', 'TBD', 'Implemented', 'Planned'],
+            datasets: [{
+                data: [4, 53, 33, 10], // Yüzdelik dilimler
+                backgroundColor: ['#36A2EB', '#FF9F40', '#4BC0C0', '#FFCE56'],
+                borderColor: ['#36A2EB', '#FF9F40', '#4BC0C0', '#FFCE56'],
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(document.getElementById('actionPlanChart').getContext('2d'), {
+            type: 'doughnut',
+            data: actionPlanData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false, // Default legendi gizliyoruz
+                        position: 'top'
+                    },
+                    datalabels: {
+                        formatter: (value) => `${value}%`,
+                        color: '#000',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        });
+
+const riskMapData = {
+    datasets: [{
+        label: 'Risk Map',
+        data: [
+            { x: 1, y: 1, r: (Math.random() * 10 + 5) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 2, y: 2, r: (Math.random() * 10 + 10) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 2, y: 3, r: (Math.random() * 10 + 15) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 3, y: 2, r: (Math.random() * 10 + 20) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 3, y: 3, r: (Math.random() * 10 + 25) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 4, y: 4, r: (Math.random() * 10 + 30) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 4, y: 5, r: (Math.random() * 10 + 40) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 5, y: 4, r: (Math.random() * 10 + 45) * 0.5, count: Math.floor(Math.random() * 10) + 1 },
+            { x: 5, y: 5, r: (Math.random() * 10 + 50) * 0.5, count: Math.floor(Math.random() * 10) + 1 }
+        ],
+        backgroundColor: function(context) {
+            const value = context.dataset.data[context.dataIndex];
+            const riskScore = value.x * value.y;
+
+            if (riskScore <= 5) {
+                return '#28a745'; // Green (Low risk)
+            } else if (riskScore <= 10) {
+                return '#ffecb3'; // Yellow (Medium-low risk)
+            } else if (riskScore <= 15) {
+                return '#ffcc00'; // Dark yellow (Medium risk)
+            } else if (riskScore <= 20) {
+                return '#dc3545'; // Red (High risk)
+            } else if (riskScore <= 25) {
+                return '#c82333'; // Dark red (Very high risk)
+            } else {
+                return '#FF5733'; // Higher risk levels
+            }
+        },
+        hoverBackgroundColor: function(context) {
+            return context.dataset.data[context.dataIndex].backgroundColor;
+        },
+        borderColor: '#FFF',
+        borderWidth: 1,
+        // Display count inside the bubble
+       datalabels: {
+            display: true,
+            color: '#000',
+            font: {
+                weight: 'bold',
+                size: 14
+            },
+            formatter: function(value, context) {
+                return context.dataset.data[context.dataIndex].count;
+            }
+        }
+    }]
+};
+
+// Chart.js'yi başlatma
+new Chart(document.getElementById('riskMapChart').getContext('2d'), {
+    type: 'bubble',
+    data: riskMapData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            x: {
+                min: 0,
+                ticks: {
+                    stepSize: 1,
+                    beginAtZero: true
+                },
+                title: {
+                    display: true,
+                    text: 'Impact'
+                }
+            },
+            y: {
+                min: 0,
+                ticks: {
+                    stepSize: 1,
+                    beginAtZero: true
+                },
+                title: {
+                    display: true,
+                    text: 'Probability'
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItem) {
+                        return ''; // No title
+                    },
+                    label: function(tooltipItem) {
+                        return `Impact: ${tooltipItem.raw.x}, Probability: ${tooltipItem.raw.y}`;
+                    }
+                }
+            },
+            legend: {
+                display: false // Buradaki satırı ekleyerek legend'ı gizle
+            }
+        }
+    }
+});
+
+
+const riskCategoryData = {
+
+    datasets: [{
+        data: [50, 15, 20, 20, 5, 30], // Yüzdelik dilimler
+        backgroundColor: ['#FF9F40', '#36A2EB', '#FFCD56', '#4BC0C0', '#FF5A5E', '#a750ca'],
+        hoverBackgroundColor: ['#FF9F40', '#36A2EB', '#FFCD56', '#4BC0C0', '#FF5A5E', '#a750ca'],
+        borderColor: '#FFF',
+        borderWidth: 1
+    }]
+};
+
+// Chart.js'yi başlatma
+new Chart(document.getElementById('riskCategoryChart').getContext('2d'), {
+    type: 'pie',
+    data: riskCategoryData,
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItem) {
+                        return 'Risk Category: ' + tooltipItem[0].label;
+                    },
+                    label: function(tooltipItem) {
+                        return `Risk Rating: ${tooltipItem.raw}%`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Top 5 Vulnerabilities Chart Data
+const topVulnerabilitiesData = {
+    labels: ['Encryption Vulnerabilities', 'Excessive User Permissions', 'Dormant Accounts', 'Physical Security', 'Overly Trusting Employees'],
+    datasets: [{
+        label: 'Vulnerabilities',
+        data: [30, 48, 35, 60, 28], // Values for each vulnerability
+        backgroundColor: ['#4F27B7', '#36A2EB', '#FF9F40', '#FFCE56', '#4BC0C0'],
+        borderColor: ['#4F27B7', '#36A2EB', '#FF9F40', '#FFCE56', '#4BC0C0'],
+        borderWidth: 1
+    }]
+};
+
+// Top 5 Risks Chart Data
+const topRisksData = {
+    labels: ['Risk 1', 'Risk 2', 'Risk 3', 'Risk 4', 'Risk 5'],
+    datasets: [{
+        label: 'Risks',
+        data: [54, 18, 11, 12, 14], // Values for each risk
+        backgroundColor: ['#4F27B7', '#36A2EB', '#FF9F40', '#FFCE56', '#4BC0C0'],
+        borderColor: ['#4F27B7', '#36A2EB', '#FF9F40', '#FFCE56', '#4BC0C0'],
+        borderWidth: 1
+    }]
+};
+
+// Creating the chart for Top 5 Vulnerabilities (Horizontal Bar)
+new Chart(document.getElementById('topVulnerabilitiesChart').getContext('2d'), {
+    type: 'bar',
+    data: topVulnerabilitiesData,
+    options: {
+        responsive: true,
+        indexAxis: 'y',  // Yatay bar chart
+        scales: {
+            x: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Creating the chart for Top 5 Risks (Horizontal Bar)
+new Chart(document.getElementById('topRisksChart').getContext('2d'), {
+    type: 'bar',
+    data: topRisksData,
+    options: {
+        responsive: true,
+        indexAxis: 'y',  // Yatay bar chart
+        scales: {
+            x: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+
+
+        // Vis Timeline setup
+        const container = document.getElementById('timeline');
+
         const statusColors = {
             'Completed': 'rgba(54, 162, 235, 0.2)',
             'In progress': 'rgba(255, 206, 86, 0.2)',
@@ -23,83 +276,12 @@ document.addEventListener("DOMContentLoaded", function () {
             'In progress': 'rgba(255, 206, 86, 1)',
             'Fieldwork': 'rgba(255, 99, 132, 1)'
         };
-        const statusCounts = records.reduce((acc, record) => {
-            const status = record.fields.Status;
-            const year = record.fields["Audit Year"];
-            if (!acc[status]) {
-                acc[status] = {
-                    count: 0,
-                    audits: []
-                };
-            }
-            acc[status].count++;
-            acc[status].audits.push(record.fields["Audit Name"]);
-            return acc;
-        }, {});
 
-        const labels = Object.keys(statusCounts);
-        const counts = labels.map(label => statusCounts[label].count);
-        const total = counts.reduce((acc, count) => acc + count, 0);
-
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Status Distribution',
-                    data: counts,
-                    backgroundColor: labels.map(label => statusColors[label]),
-                    borderColor: labels.map(label => statusBorderColors[label]),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    datalabels: {
-                        formatter: (value, context) => {
-                            const percentage = (value / total * 100).toFixed(2) + '%';
-                            return percentage;
-                        },
-                        color: '#000',
-                        font: {
-                            weight: 'bold'
-                        }
-                    },
-                    tooltip: {
-                        enabled: false
-                    }
-                },
-                onClick: (evt, item) => {
-                    if (item.length > 0) {
-                        const index = item[0].index;
-                        const status = labels[index];
-                        const audits = statusCounts[status].audits;
-
-                        if (currentTimeout) {
-                            clearTimeout(currentTimeout);
-                        }
-
-                        showAuditList(audits, status);
-                    }
-                }
-            },
-            plugins: [ChartDataLabels]
-        });
-
-        // Vis Timeline setup
-        const container = document.getElementById('timeline');
         const items = new vis.DataSet(records.map(record => ({
             id: record.id,
             content: record.fields["Audit Name"],
-            start: record.fields["Start Date"],
-            end: record.fields["Deadline"],
+            start: new Date(record.fields["Start Date"]), // Tarih formatını düzelt
+            end: new Date(record.fields["Deadline"]), // Tarih formatını düzelt
             title: `Status: ${record.fields["Status"]}`,
             className: `timeline-item-${record.fields.Status.replace(/\s+/g, '-').toLowerCase()}`,
             style: `background-color: ${statusColors[record.fields.Status]}; border-color: ${statusBorderColors[record.fields.Status]};`
@@ -112,26 +294,26 @@ document.addEventListener("DOMContentLoaded", function () {
             editable: false,
             align: 'center',
             orientation: 'top',
-            min: new Date(new Date().getFullYear() - 1, 0, 1), // start from January of the previous year
-            max: new Date(new Date().getFullYear() + 1, 11, 31), // end at December of the next year
-            start: new Date(), // Start at today's date
-            end: new Date(new Date().setMonth(new Date().getMonth() + 6)) // End 6 months from today's date
+            min: new Date(new Date().getFullYear() - 1, 0, 1),
+            max: new Date(new Date().getFullYear() + 1, 11, 31),
+            start: new Date(),
+            end: new Date(new Date().setMonth(new Date().getMonth() + 6))
         };
 
         const timeline = new vis.Timeline(container, items, options);
 
-        // Add today button functionality
+        // Today button functionality
         document.getElementById('today-button').addEventListener('click', () => {
             timeline.moveTo(new Date());
         });
 
-        // Add hover functionality
+        // Hover functionality for tooltips
         timeline.on('itemover', function (props) {
             const item = items.get(props.item);
             showTooltip(props.event, item.title);
         });
 
-        timeline.on('itemout', function (props) {
+        timeline.on('itemout', function () {
             hideTooltip();
         });
 

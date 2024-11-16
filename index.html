@@ -3,38 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Getir Internal Audit Executive Dashboard</title>
+    <title>Risk Management Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <!-- Chart.js plugin datalabels sadece bir kez yüklenmeli -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <!-- vis-timeline kütüphanesinin doğru sürümünü kullanıyoruz (Standalone build) -->
     <link href="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.js"></script>
-    <link rel="icon" href="logo.png">
+
 </head>
 <body>
-    <h1>Getir Internal Audit Executive Dashboard</h1>
+    <h1>Risk Management Dashboard</h1>
+    
     <div class="year-selector">
         <select id="yearSelector">
             <option value="all">All</option>
-            <!-- Add year options dynamically using JavaScript -->
         </select>
     </div>
-    <div class="chart-wrapper">
-        <h2 class="chart-title">Audit Project Status Distribution</h2>
-        <div class="chart-container">
-            <canvas id="statusChart"></canvas>
-            <div id="chartCenterText" class="chart-center-text"></div>
+    
+    <div class="progress-section">
+        <div class="progress-item">
+            <h3>Inherent Risks Score <i>(1-4)</i></h3>
+            <p class="progress-value">2.4</p>
+        </div>
+        <div class="progress-item">
+            <h3>Residual Risk Score <i>(1-4)</i></h3>
+            <p class="progress-value">1.6</p>
+        </div>
+        <div class="progress-item">
+            <h3>Remediation Progress</h3>
+            <p class="progress-value">56.2%</p>
+        </div>
+        <div class="progress-item">
+            <h3>Key Control Failure Rate</h3>
+            <p class="progress-value">87.5%</p>
+        </div>
+    </div> <br>
+
+    <!-- Risk Map ve diğer grafiklerin yer aldığı container -->
+    <div class="graph-container">
+        <!-- Risk Map -->
+        <div class="risk-map-wrapper">
+            <h2 class="chart-title">Risk Map</h2>
+            <div class="risk-map-container">
+                <canvas id="riskMapChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Diğer Grafikler -->
+        <div class="chart-wrapper">
+            <h2 class="chart-title">Risk Rating Breakdown</h2>
+            <div class="chart-container">
+                <canvas id="riskRatingChart"></canvas>
+                <img src="image1.png" alt="Center Image" class="center-image">
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #FF6384;"></div>
+                    <span class="legend-label">Critical Risk</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #FF9F40;"></div>
+                    <span class="legend-label">High Risk</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #FFCE56;"></div>
+                    <span class="legend-label">Medium Risk</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background-color: #36A2EB;"></div>
+                    <span class="legend-label">Low Risk</span>
+                </div>
+            </div>
+        </div>
+
+      <div class="chart-wrapper">
+    <h2 class="chart-title">Action Plan Breakdown</h2>
+    <div class="chart-container">
+        <canvas id="actionPlanChart"></canvas>
+        <img src="image2.png" alt="Center Image" class="center-image2">
+    </div>
+
+    <!-- Legend Ekleme Alanı -->
+    <div class="legend" id="actionPlanLegend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #36A2EB;"></div>
+            <span class="legend-label">Deferred</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #FF9F40;"></div>
+            <span class="legend-label">TBD</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #4BC0C0;"></div>
+            <span class="legend-label">Implemented</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #FFCE56;"></div>
+            <span class="legend-label">Planned</span>
         </div>
     </div>
-    <div class="audit-list-wrapper" id="auditListWrapper" style="display:none;">
-        <h3 id="auditListTitle">Audit Projects</h3>
-        <ul id="auditList"></ul>
+</div>
+
+<div class="risk-category-wrapper">
+    <h2 class="chart-title">Risk Category By Total Risk Rating</h2>
+    <div class="risk-category-container">
+        <canvas id="riskCategoryChart"></canvas>
     </div>
-    <div class="chart-wrapper timeline-wrapper">
-        <h2>Audit Projects Timeline</h2>
-        <button id="today-button">Today</button>
-        <div id="timeline"></div>
+
+    <!-- Legend Ekleme Alanı -->
+    <div class="legend" id="riskCategoryLegend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #FF9F40;"></div>
+            <span class="legend-label">Reporting/Financial Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #36A2EB;"></div>
+            <span class="legend-label">Internal Control Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #FFCD56;"></div>
+            <span class="legend-label">Strategic Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #4BC0C0;"></div>
+            <span class="legend-label">Compliance Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #FF5A5E;"></div>
+            <span class="legend-label">Operational Risk</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background-color: #a750ca;"></div>
+            <span class="legend-label">IT & Cyber Security Risk</span>
+        </div>
     </div>
+</div>
+    </div></div> <br><br><br>
+     <div class="graph-container">
+        <!-- Risk Map -->
+        <div class="risk-map-wrapper">
+           <h2 class="chart-title">Top 5 Risks</h2>
+            <div class="risk-map-container">
+               <canvas id="topRisksChart"></canvas>
+            </div>
+        </div>
+
+<div class="graph-container">
+        <!-- Risk Map -->
+        <div class="risk-map-wrapper">
+           <h2 class="chart-title">Top 5 Vulnerabilities</h2>
+            <div class="risk-map-container">
+                    <canvas id="topVulnerabilitiesChart"></canvas>
+            </div>
+        </div>
+
+
+
+
+
+    <br><br>
+
+   
+    
     <script src="script.js"></script>
 </body>
 </html>
