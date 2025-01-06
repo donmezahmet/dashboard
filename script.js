@@ -1,14 +1,14 @@
 let currentTimeout;
 
 document.addEventListener("DOMContentLoaded", function () {
-    const apiKey = 'paterprymY3bvNFEU.4dc918b6de1a00a553b4eff674b73e039f2daa5b5c2f9414607e5af126a2987d';
+ 
     const baseId = 'apptCUn5WwTZtUzr9';
     const tableName = 'Audit Projects';
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+   
 
     fetch(url, {
         headers: {
-            Authorization: `Bearer ${apiKey}`
+          
         }
     })
     .then(response => response.json())
