@@ -1,174 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Management Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Chart.js plugin datalabels sadece bir kez yüklenmeli -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-
-    <!-- vis-timeline kütüphanesinin doğru sürümünü kullanıyoruz (Standalone build) -->
-    <link href="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://unpkg.com/vis-timeline@7.4.7/dist/vis-timeline-graph2d.min.js"></script>
-
+  <meta charset="UTF-8">
+  <title>Audit Findings Executive Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+    }
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 16px 40px;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 40px;
+      gap: 40px;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+      width: 100%;
+      max-width: 900px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
 </head>
 <body>
-    <h1>Risk Management Dashboard</h1>
-    
-    <div class="year-selector">
-        <select id="yearSelector">
-            <option value="all">All</option>
-        </select>
+  <header>Audit Findings Executive Dashboard</header>
+  <div class="container">
+    <div class="card">
+      <h2>Audit Findings by Year and Status</h2>
+      <canvas id="statusChart"></canvas>
     </div>
-    
-    <div class="progress-section">
-        <div class="progress-item">
-            <h3>Inherent Risks Score <i>(1-4)</i></h3>
-            <p class="progress-value">2.4</p>
-        </div>
-        <div class="progress-item">
-            <h3>Residual Risk Score <i>(1-4)</i></h3>
-            <p class="progress-value">1.6</p>
-        </div>
-        <div class="progress-item">
-            <h3>Remediation Progress</h3>
-            <p class="progress-value">56.2%</p>
-        </div>
-        <div class="progress-item">
-            <h3>Key Control Failure Rate</h3>
-            <p class="progress-value">87.5%</p>
-        </div>
-    </div> <br>
+  </div>
 
-    <!-- Risk Map ve diğer grafiklerin yer aldığı container -->
-    <div class="graph-container">
-        <!-- Risk Map -->
-        <div class="risk-map-wrapper">
-            <h2 class="chart-title">Risk Map</h2>
-            <div class="risk-map-container">
-                <canvas id="riskMapChart"></canvas>
-            </div>
-        </div>
+  <script>
+    let statusChart;
+    fetch('http://localhost:3000/api/finding-status-by-year')
+      .then(res => res.json())
+      .then(data => {
+        const years = Object.keys(data)
+          .filter(y => y !== 'Unknown')
+          .sort()
+          .concat(Object.keys(data).includes('Unknown') ? ['Unknown'] : []);
 
-        <!-- Diğer Grafikler -->
-        <div class="chart-wrapper">
-            <h2 class="chart-title">Risk Rating Breakdown</h2>
-            <div class="chart-container">
-                <canvas id="riskRatingChart"></canvas>
-                <img src="image1.png" alt="Center Image" class="center-image">
-            </div>
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #FF6384;"></div>
-                    <span class="legend-label">Critical Risk</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #FF9F40;"></div>
-                    <span class="legend-label">High Risk</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #FFCE56;"></div>
-                    <span class="legend-label">Medium Risk</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background-color: #36A2EB;"></div>
-                    <span class="legend-label">Low Risk</span>
-                </div>
-            </div>
-        </div>
+        const completed = years.map(y => data[y].Completed || 0);
+        const open = years.map(y => data[y].Open || 0);
+        const overdue = years.map(y => data[y].Overdue || 0);
 
-      <div class="chart-wrapper">
-    <h2 class="chart-title">Action Plan Breakdown</h2>
-    <div class="chart-container">
-        <canvas id="actionPlanChart"></canvas>
-        <img src="image2.png" alt="Center Image" class="center-image2">
-    </div>
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        statusChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: years.map(y => y === 'Unknown' ? 'Not Assigned' : y),
+            datasets: [
+              {
+                label: 'Completed',
+                data: completed,
+                backgroundColor: '#27ae60',
+                borderRadius: 6,
+                barThickness: 120
+              },
+              {
+                label: 'Open',
+                data: open,
+                backgroundColor: '#2980b9',
+                borderRadius: 6,
+                barThickness: 120
+              },
+              {
+                label: 'Overdue',
+                data: overdue,
+                backgroundColor: '#c0392b',
+                borderRadius: 6,
+                barThickness: 120
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  font: {
+                    size: 14,
+                    family: 'Segoe UI'
+                  }
+                }
+              },
+              datalabels: {
+                color: '#fff',
+                font: {
+                  family: 'Segoe UI',
+                  size: 12,
+                  weight: 'bold'
+                },
+                formatter: (value, ctx) => {
+                  const label = ctx.dataset.label;
+                  return value > 0 ? `${label} (${value})` : '';
+                },
+                anchor: ctx => ctx.dataset.data[ctx.dataIndex] < 5 ? 'end' : 'center',
+                align: ctx => ctx.dataset.data[ctx.dataIndex] < 5 ? 'start' : 'center',
+                clamp: true,
+                clip: false
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: {
+                  font: { size: 13 }
+                }
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                ticks: {
+                  font: { size: 13 }
+                }
+              }
+            },
+            onClick: async (evt, elements) => {
+              if (elements.length > 0) {
+                const chart = elements[0];
+                const year = statusChart.data.labels[chart.index];
+                const status = statusChart.data.datasets[chart.datasetIndex].label;
 
-    <!-- Legend Ekleme Alanı -->
-    <div class="legend" id="actionPlanLegend">
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #36A2EB;"></div>
-            <span class="legend-label">Deferred</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #FF9F40;"></div>
-            <span class="legend-label">TBD</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #4BC0C0;"></div>
-            <span class="legend-label">Implemented</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #FFCE56;"></div>
-            <span class="legend-label">Planned</span>
-        </div>
-    </div>
-</div>
+                const res = await fetch(`http://localhost:3000/api/finding-details?year=${encodeURIComponent(year)}&status=${status}`);
+                const issues = await res.json();
 
-<div class="risk-category-wrapper">
-    <h2 class="chart-title">Risk Category By Total Risk Rating</h2>
-    <div class="risk-category-container">
-        <canvas id="riskCategoryChart"></canvas>
-    </div>
+                const html = `<strong>${status} Findings in ${year}:</strong><ul>` +
+                  issues.map(issue => `<li><strong>${issue.key}</strong>: ${issue.summary}</li>`).join('') + '</ul>';
 
-    <!-- Legend Ekleme Alanı -->
-    <div class="legend" id="riskCategoryLegend">
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #FF9F40;"></div>
-            <span class="legend-label">Reporting/Financial Risk</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #36A2EB;"></div>
-            <span class="legend-label">Internal Control Risk</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #FFCD56;"></div>
-            <span class="legend-label">Strategic Risk</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #4BC0C0;"></div>
-            <span class="legend-label">Compliance Risk</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #FF5A5E;"></div>
-            <span class="legend-label">Operational Risk</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-dot" style="background-color: #a750ca;"></div>
-            <span class="legend-label">IT & Cyber Security Risk</span>
-        </div>
-    </div>
-</div>
-    </div></div> <br><br><br>
-     <div class="graph-container">
-        <!-- Risk Map -->
-        <div class="risk-map-wrapper">
-           <h2 class="chart-title">Top 5 Risks</h2>
-            <div class="risk-map-container">
-               <canvas id="topRisksChart"></canvas>
-            </div>
-        </div>
-
-<div class="graph-container">
-        <!-- Risk Map -->
-        <div class="risk-map-wrapper">
-           <h2 class="chart-title">Top 5 Vulnerabilities</h2>
-            <div class="risk-map-container">
-                    <canvas id="topVulnerabilitiesChart"></canvas>
-            </div>
-        </div>
-
-
-
-
-
-    <br><br>
-
-   
-    
-    <script src="script.js"></script>
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                  <html>
+                    <head>
+                      <title>${status} Findings - ${year}</title>
+                      <style>body { font-family: 'Segoe UI', sans-serif; padding: 20px; line-height: 1.6; } strong { color: #2c3e50; }</style>
+                    </head>
+                    <body>${html}</body>
+                  </html>
+                `);
+              }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+      });
+  </script>
 </body>
 </html>
